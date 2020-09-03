@@ -50,7 +50,7 @@ def get_pgn(start, end):
     loop.run_until_complete(run(start, end))
 
 
-def parse_pgn(filename):
+def parse_pgn(filename) -> pgn:
 
     contents = open(filename, 'r').read()
 
@@ -93,7 +93,7 @@ def parse_pgn_folder(path):
     for filename in os.listdir(path):
         game = parse_pgn(os.path.join(path, filename))
 
-        if game.white_elo >= 1500 and game.black_elo >= 1500:
+        if game.white_elo >= 1500 and game.black_elo >= 1500 and game.variant == 'normal':
             good += 1
 
         total += 1
