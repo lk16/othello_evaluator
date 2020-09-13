@@ -3,9 +3,10 @@ import aiohttp
 import asyncio
 import click
 import os
+import subprocess
 
 from aiofile import AIOFile
-from evaluator.board import Board, BLACK, WHITE
+from evaluator.board import Board, BLACK, MOVE_PASS, WHITE
 from evaluator.pgn import Pgn
 from evaluator.bot import Bot
 
@@ -93,17 +94,57 @@ def parse_pgn_folder(path):
                 good, total, 100*good/total))
 
 
+def evaluate(board: Board) -> int:
+    process = subprocess.run(
+        ["./heuristics/heuristics", hex(board.me), hex(board.opp)],
+        capture_output=True,
+    )
+    if process.returncode != 0:
+        raise Exception("Heuristics process failed: {}".format(process.stdout.decode('utf-8')))
+
+    result_line = process.stdout.decode('utf-8').split('\n')[-2]
+    if not result_line.startswith('result = '):
+        raise ValueError("expected result line")
+
+    return int(result_line.split(' ')[-1].strip())
+
+
 @cli.command()
 @click.argument('filename', type=str)
 def parse_pgn_file(filename):
     game = parse_pgn(filename)
     board = Board()
-    bot = Bot(5)
-    for move in game.moves:
-        board.show()
-        print('Heuristic: {}\n'.format(bot.search(board)))
-        board = board.do_move(move)
     board.show()
+
+    for move in game.moves:
+        if board.get_moves() == 0:
+            board = board.do_move(move)
+            continue
+
+        children = board.get_children()
+        best_heur = -64000
+        best_child = None
+        for child in children:
+            heur = -evaluate(child)
+            print('child heuristic: {}'.format(heur))
+            if heur > best_heur:
+                best_heur = heur
+                best_child = child
+
+        chosen_child = board.do_move(move)
+
+        if chosen_child == best_child:
+            print('correct move')
+            best_child.show()
+
+        else:
+            print('wrong move')
+            chosen_child.show()
+            print('better move:')
+            best_child.show()
+
+        board = chosen_child
+
     print('White {} - {} Black'.format(
         board.count(WHITE),
         board.count(BLACK),

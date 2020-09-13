@@ -3,8 +3,8 @@
 #include "board.h"
 #include "bot.h"
 
-#define SEARCH_DEPTH 10
-#define PERFECT_DEPTH 16
+#define SEARCH_DEPTH 8
+#define PERFECT_DEPTH 12
 
 
 int main(int argc, char **argv) {
