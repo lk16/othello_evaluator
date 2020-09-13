@@ -25,7 +25,13 @@ struct cubed_bot {
 
     /** @brief total visited nodes for performance measurement */
     size_t nodes;
+
+    int_fast32_t last_best_heur;
 };
+
+int_fast32_t cubed_bot_get_last_best_heur(const struct cubed_bot *bot) {
+    return bot->last_best_heur;
+}
 
 
 static void cubed_bot_print_stats(const struct cubed_bot *bot) {
@@ -247,6 +253,7 @@ static void cubed_bot_search(struct cubed_bot *bot,const struct cubed_board *boa
         printf("move %zd/%zd: %" PRIdFAST32 "\n", i+1,total_children,best_heur);
         g_timer_continue(bot->timer);
     }
+    bot->last_best_heur = best_heur;
     g_timer_stop(bot->timer);
     cubed_bot_print_stats(bot);
 }
@@ -262,6 +269,7 @@ struct cubed_bot *cubed_bot_new(void) {
     bot->timer = g_timer_new();
     bot->moves_left = 0;
     bot->nodes = 0;
+    bot->last_best_heur = 0;
     return bot;
 }
 

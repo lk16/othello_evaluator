@@ -65,4 +65,15 @@ target_link_libraries(testing
     ${GLIB_LIBRARIES}
 )
 
+add_executable(heuristics
+    heuristics.c
+    bitset.c
+    board.c
+    bot.c
+)
 
+set_target_properties(heuristics PROPERTIES COMPILE_FLAGS ${OPTMISING_FLAGS})
+
+target_link_libraries(heuristics
+    ${GLIB_LIBRARIES}
+)

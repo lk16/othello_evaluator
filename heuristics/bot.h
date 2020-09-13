@@ -85,3 +85,5 @@ int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *bo
 */
 int_fast32_t cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_board *board,int_fast32_t lower_bound,
         int_fast32_t upper_bound,int_fast32_t guess);
+
+int_fast32_t cubed_bot_get_last_best_heur(const struct cubed_bot *bot);

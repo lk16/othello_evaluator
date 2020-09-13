@@ -9,4 +9,5 @@ heuristics/Makefile
 heuristics/dev_cubed
 heuristics/cubed
 heuristics/testing
+heuristics/heuristics
 *.code-workspace
