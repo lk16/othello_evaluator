@@ -286,13 +286,6 @@ void cubed_bot_set_search_depth(struct cubed_bot *bot,size_t depth,size_t exact_
 
 void cubed_bot_do_move(struct cubed_bot *bot,const struct cubed_board *in,struct cubed_board *out) {
     uint64_t moves = cubed_board_get_valid_moves(in->me,in->opp);
-    if (uint64_count(moves) == 1) {
-        size_t move = uint64_only_bit_index(moves);
-        *out = *in;
-        cubed_board_do_move(out,move);
-        printf("Only one valid move, evaluation skipped\n");
-        return;
-    }
     size_t empty_fields = uint64_count(~(in->me | in->opp));
     bool exact_search = empty_fields <= bot->perfect_depth;
     cubed_bot_search(bot,in,out,exact_search);
