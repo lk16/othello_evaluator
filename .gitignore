@@ -2,3 +2,11 @@ venv
 pgn
 .vscode
 __pycache__
+heuristics/CMakeFiles
+heuristics/cmake_install.cmake
+heuristics/CMakeCache.txt
+heuristics/Makefile
+heuristics/dev_cubed
+heuristics/cubed
+heuristics/testing
+*.code-workspace
