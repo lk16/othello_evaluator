@@ -61,7 +61,7 @@ void cubed_bot_do_move(struct cubed_bot *bot,const struct cubed_board *in,struct
     @param board the board
     @return the heuristic
 */
-int_fast32_t cubed_bot_heuristic_moves(const struct cubed_board *board);
+int cubed_bot_heuristic_moves(const struct cubed_board *board);
 
 /**
     @brief Call mtdf cubed_bot_mtdf repeatedly to find minimax value
@@ -71,8 +71,8 @@ int_fast32_t cubed_bot_heuristic_moves(const struct cubed_board *board);
     @param upper_bound upper bound
     @param guess guessed minimax value
 */
-int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *board,int_fast32_t lower_bound,
-                                    int_fast32_t upper_bound,int_fast32_t guess);
+int cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *board,int lower_bound,
+                                    int upper_bound,int guess);
 
 
 /**
@@ -83,7 +83,7 @@ int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *bo
     @param upper_bound upper bound
     @param guess guessed minimax value
 */
-int_fast32_t cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_board *board,int_fast32_t lower_bound,
-        int_fast32_t upper_bound,int_fast32_t guess);
+int cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_board *board,int lower_bound,
+        int upper_bound,int guess);
 
-int_fast32_t cubed_bot_get_last_best_heur(const struct cubed_bot *bot);
+int cubed_bot_get_last_best_heur(const struct cubed_bot *bot);

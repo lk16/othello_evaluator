@@ -75,7 +75,7 @@ uint64_t cubed_board_get_valid_moves(uint64_t me,uint64_t opp);
     @param board the board
     @return the disc difference
 */
-int_fast32_t cubed_board_get_disc_diff(const struct cubed_board *board);
+int cubed_board_get_disc_diff(const struct cubed_board *board);
 
 /**
     @brief Count disc difference, empties are for winning party
@@ -83,7 +83,7 @@ int_fast32_t cubed_board_get_disc_diff(const struct cubed_board *board);
     @param opp bitset of other player
     @return the disc difference
 */
-int_fast32_t cubed_board_get_disc_diff_uint64(uint64_t me,uint64_t opp);
+int cubed_board_get_disc_diff_uint64(uint64_t me,uint64_t opp);
 
 /**
     @brief Generate all children of a board
@@ -134,7 +134,7 @@ struct cubed_board_estimate {
     struct cubed_board board;
 
     /** @brief the estimate */
-    int_fast32_t estimate;
+    int estimate;
 };
 
 /**

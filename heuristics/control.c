@@ -206,7 +206,7 @@ static void cubed_board_init_xot(struct cubed_board *board,struct cubed_control 
 
         struct cubed_board *xot_board = xot_boards;
         while(fgets(buff,buff_size,xot_file)){
-            int res = sscanf(buff, "0x%" PRIx64 " 0x%" PRIx64,&xot_board->me,&xot_board->opp);
+            int res = sscanf(buff, "0x%lx 0x%lx",&xot_board->me,&xot_board->opp);
             if(res < 0){
                 printf("%s","Reading xot file failed.\n");
                 exit(1);

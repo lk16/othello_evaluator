@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     cubed_board_print(&afterwards);
 
 
-    printf("result = %" PRIdFAST32 "\n", cubed_bot_get_last_best_heur(bot));
+    printf("result = %d\n", cubed_bot_get_last_best_heur(bot));
 
     cubed_bot_destroy(bot);
     return 0;

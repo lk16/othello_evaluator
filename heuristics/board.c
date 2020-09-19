@@ -50,13 +50,13 @@ uint64_t cubed_board_hash(const struct cubed_board *board) {
 }
 
 
-int_fast32_t cubed_board_get_disc_diff(const struct cubed_board *board) {
+int cubed_board_get_disc_diff(const struct cubed_board *board) {
     return cubed_board_get_disc_diff_uint64(board->me,board->opp);
 }
 
-int_fast32_t cubed_board_get_disc_diff_uint64(uint64_t me,uint64_t opp) {
-    int_fast32_t me_count = (int_fast32_t)uint64_count(me);
-    int_fast32_t opp_count = (int_fast32_t)uint64_count(opp);
+int cubed_board_get_disc_diff_uint64(uint64_t me,uint64_t opp) {
+    int me_count = (int)uint64_count(me);
+    int opp_count = (int)uint64_count(opp);
     if (me_count > opp_count) {
         return 64 - (2* opp_count);
     }
@@ -156,73 +156,73 @@ size_t cubed_board_get_move_index(const struct cubed_board *before,const struct 
     return uint64_first_index(diff);
 }
 
-#include "board_do_move.c"
+#include "flip_sse.c"
 
 static uint64_t(*const cubed_move_funcs[64])(uint64_t,uint64_t) = {
-    cubed_board_get_flips_0,
-    cubed_board_get_flips_1,
-    cubed_board_get_flips_2,
-    cubed_board_get_flips_3,
-    cubed_board_get_flips_4,
-    cubed_board_get_flips_5,
-    cubed_board_get_flips_6,
-    cubed_board_get_flips_7,
-    cubed_board_get_flips_8,
-    cubed_board_get_flips_9,
-    cubed_board_get_flips_10,
-    cubed_board_get_flips_11,
-    cubed_board_get_flips_12,
-    cubed_board_get_flips_13,
-    cubed_board_get_flips_14,
-    cubed_board_get_flips_15,
-    cubed_board_get_flips_16,
-    cubed_board_get_flips_17,
-    cubed_board_get_flips_18,
-    cubed_board_get_flips_19,
-    cubed_board_get_flips_20,
-    cubed_board_get_flips_21,
-    cubed_board_get_flips_22,
-    cubed_board_get_flips_23,
-    cubed_board_get_flips_24,
-    cubed_board_get_flips_25,
-    cubed_board_get_flips_26,
-    cubed_board_get_flips_27,
-    cubed_board_get_flips_28,
-    cubed_board_get_flips_29,
-    cubed_board_get_flips_30,
-    cubed_board_get_flips_31,
-    cubed_board_get_flips_32,
-    cubed_board_get_flips_33,
-    cubed_board_get_flips_34,
-    cubed_board_get_flips_35,
-    cubed_board_get_flips_36,
-    cubed_board_get_flips_37,
-    cubed_board_get_flips_38,
-    cubed_board_get_flips_39,
-    cubed_board_get_flips_40,
-    cubed_board_get_flips_41,
-    cubed_board_get_flips_42,
-    cubed_board_get_flips_43,
-    cubed_board_get_flips_44,
-    cubed_board_get_flips_45,
-    cubed_board_get_flips_46,
-    cubed_board_get_flips_47,
-    cubed_board_get_flips_48,
-    cubed_board_get_flips_49,
-    cubed_board_get_flips_50,
-    cubed_board_get_flips_51,
-    cubed_board_get_flips_52,
-    cubed_board_get_flips_53,
-    cubed_board_get_flips_54,
-    cubed_board_get_flips_55,
-    cubed_board_get_flips_56,
-    cubed_board_get_flips_57,
-    cubed_board_get_flips_58,
-    cubed_board_get_flips_59,
-    cubed_board_get_flips_60,
-    cubed_board_get_flips_61,
-    cubed_board_get_flips_62,
-    cubed_board_get_flips_63
+    flip_A1,
+    flip_B1,
+    flip_C1,
+    flip_D1,
+    flip_E1,
+    flip_F1,
+    flip_G1,
+    flip_H1,
+    flip_A2,
+    flip_B2,
+    flip_C2,
+    flip_D2,
+    flip_E2,
+    flip_F2,
+    flip_G2,
+    flip_H2,
+    flip_A3,
+    flip_B3,
+    flip_C3,
+    flip_D3,
+    flip_E3,
+    flip_F3,
+    flip_G3,
+    flip_H3,
+    flip_A4,
+    flip_B4,
+    flip_C4,
+    flip_D4,
+    flip_E4,
+    flip_F4,
+    flip_G4,
+    flip_H4,
+    flip_A5,
+    flip_B5,
+    flip_C5,
+    flip_D5,
+    flip_E5,
+    flip_F5,
+    flip_G5,
+    flip_H5,
+    flip_A6,
+    flip_B6,
+    flip_C6,
+    flip_D6,
+    flip_E6,
+    flip_F6,
+    flip_G6,
+    flip_H6,
+    flip_A7,
+    flip_B7,
+    flip_C7,
+    flip_D7,
+    flip_E7,
+    flip_F7,
+    flip_G7,
+    flip_H7,
+    flip_A8,
+    flip_B8,
+    flip_C8,
+    flip_D8,
+    flip_E8,
+    flip_F8,
+    flip_G8,
+    flip_H8
 };
 
 

@@ -37,7 +37,7 @@ static void uint64_print(uint64_t bitset) {
     printf("%s","+-----------------+\n");
 }
 
-static int_fast32_t cubed_bot_pvs_polish(int_fast32_t heuristic,int_fast32_t alpha,int_fast32_t beta) {
+static int cubed_bot_pvs_polish(int heuristic,int alpha,int beta) {
     assert(alpha <= beta);
     if(heuristic < alpha) {
         return alpha;
@@ -48,11 +48,11 @@ static int_fast32_t cubed_bot_pvs_polish(int_fast32_t heuristic,int_fast32_t alp
     return heuristic;
 }
 
-static int_fast32_t cubed_bot_minimax(const struct cubed_board *board,bool is_max,size_t depth_left) {
+static int cubed_bot_minimax(const struct cubed_board *board,bool is_max,size_t depth_left) {
     assert(is_max == TRUE || is_max == FALSE);
     assert(board);
-    assert(depth_left >= 0 && depth_left <= 60);
-    int_fast32_t res;
+    assert(depth_left <= 60);
+    int res;
     uint64_t valid_moves;
     struct cubed_board child;
     if(depth_left == 0) {
@@ -66,7 +66,7 @@ static int_fast32_t cubed_bot_minimax(const struct cubed_board *board,bool is_ma
                 child = *board;
                 uint64_t move_bit = uint64_first_bit(valid_moves);
                 cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-                int_fast32_t heur = cubed_bot_minimax(&child,!is_max,depth_left-1);
+                int heur = cubed_bot_minimax(&child,!is_max,depth_left-1);
                 valid_moves ^= move_bit;
                 if(is_max && heur > res) {
                     res = heur;
@@ -92,10 +92,10 @@ static int_fast32_t cubed_bot_minimax(const struct cubed_board *board,bool is_ma
     return res;
 }
 
-static int_fast32_t cubed_bot_minimax_exact(const struct cubed_board *board,bool is_max) {
+static int cubed_bot_minimax_exact(const struct cubed_board *board,bool is_max) {
     assert(is_max == TRUE || is_max == FALSE);
     assert(board);
-    int_fast32_t res;
+    int res;
     struct cubed_board child;
     uint64_t valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
     if(valid_moves) {
@@ -104,7 +104,7 @@ static int_fast32_t cubed_bot_minimax_exact(const struct cubed_board *board,bool
             child = *board;
             uint64_t move_bit = uint64_first_bit(valid_moves);
             cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-            int_fast32_t heur = cubed_bot_minimax_exact(&child,!is_max);
+            int heur = cubed_bot_minimax_exact(&child,!is_max);
             valid_moves ^= move_bit;
             if(is_max && heur > res) {
                 res = heur;
@@ -130,7 +130,7 @@ static int_fast32_t cubed_bot_minimax_exact(const struct cubed_board *board,bool
 }
 
 
-static int_fast32_t cubed_bot_alphabeta_polish(int_fast32_t heuristic,int_fast32_t alpha,int_fast32_t beta) {
+static int cubed_bot_alphabeta_polish(int heuristic,int alpha,int beta) {
     assert(alpha <= beta);
     if(heuristic < alpha) {
         return alpha;
@@ -141,13 +141,13 @@ static int_fast32_t cubed_bot_alphabeta_polish(int_fast32_t heuristic,int_fast32
     return heuristic;
 }
 
-static int_fast32_t cubed_bot_alphabeta(const struct cubed_board *board,int_fast32_t alpha,int_fast32_t beta,
+static int cubed_bot_alphabeta(const struct cubed_board *board,int alpha,int beta,
                                         size_t depth_left
                                        ) {
     assert(board);
     assert(alpha <= beta);
-    assert(depth_left >= 0 && depth_left <= 60);
-    int_fast32_t res;
+    assert(depth_left <= 60);
+    int res;
     struct cubed_board child;
     uint64_t valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
     if (depth_left == 0) {
@@ -160,7 +160,7 @@ static int_fast32_t cubed_bot_alphabeta(const struct cubed_board *board,int_fast
                 child = *board;
                 uint64_t move_bit = uint64_first_bit(valid_moves);
                 cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-                int_fast32_t heur = -cubed_bot_alphabeta(&child, -beta, -res, depth_left-1);
+                int heur = -cubed_bot_alphabeta(&child, -beta, -res, depth_left-1);
                 valid_moves ^= move_bit;
                 if (heur > res) {
                     res = heur;
@@ -187,12 +187,12 @@ static int_fast32_t cubed_bot_alphabeta(const struct cubed_board *board,int_fast
     return res;
 }
 
-static int_fast32_t cubed_bot_alphabeta_exact(const struct cubed_board *board,int_fast32_t alpha,int_fast32_t beta) {
+static int cubed_bot_alphabeta_exact(const struct cubed_board *board,int alpha,int beta) {
     assert(board);
     assert(alpha <= beta);
     assert(alpha >= MIN_EXACT_HEURISTIC);
     assert(beta <= MAX_EXACT_HEURISTIC);
-    int_fast32_t res;
+    int res;
     struct cubed_board child;
     uint64_t valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
     if (valid_moves) {
@@ -201,7 +201,7 @@ static int_fast32_t cubed_bot_alphabeta_exact(const struct cubed_board *board,in
             child = *board;
             uint64_t move_bit = uint64_first_bit(valid_moves);
             cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-            int_fast32_t heur = -cubed_bot_alphabeta_exact(&child, -beta, -res);
+            int heur = -cubed_bot_alphabeta_exact(&child, -beta, -res);
             valid_moves ^= move_bit;
             if (heur > res) {
                 res = heur;
@@ -227,8 +227,8 @@ static int_fast32_t cubed_bot_alphabeta_exact(const struct cubed_board *board,in
     return res;
 }
 
-static int_fast32_t cubed_bot_pvs_null_window(const struct cubed_board *board,int_fast32_t alpha,size_t moves_left) {
-    int_fast32_t res;
+static int cubed_bot_pvs_null_window(const struct cubed_board *board,int alpha,size_t moves_left) {
+    int res;
     struct cubed_board child;
     uint64_t valid_moves;
     if (moves_left == 0) {
@@ -242,7 +242,7 @@ static int_fast32_t cubed_bot_pvs_null_window(const struct cubed_board *board,in
                 child = *board;
                 uint64_t move_bit = uint64_first_bit(valid_moves);
                 cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-                int_fast32_t heur = -cubed_bot_pvs_null_window(&child, -(alpha+1),moves_left-1);
+                int heur = -cubed_bot_pvs_null_window(&child, -(alpha+1),moves_left-1);
                 valid_moves ^= move_bit;
                 if (heur > alpha) {
                     res = alpha + 1;
@@ -269,12 +269,12 @@ static int_fast32_t cubed_bot_pvs_null_window(const struct cubed_board *board,in
     return res;
 }
 
-static int_fast32_t cubed_bot_pvs(const struct cubed_board *board,int_fast32_t alpha,int_fast32_t beta,
+static int cubed_bot_pvs(const struct cubed_board *board,int alpha,int beta,
                                   size_t moves_left
                                  ) {
     assert(board);
     assert(alpha <= beta);
-    int_fast32_t res;
+    int res;
     struct cubed_board child;
     uint64_t valid_moves;
     if (moves_left == 0) {
@@ -283,7 +283,7 @@ static int_fast32_t cubed_bot_pvs(const struct cubed_board *board,int_fast32_t a
     else {
         valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
         if (valid_moves) {
-            int_fast32_t heur;
+            int heur;
             bool first = TRUE;
             res = alpha;
             while (valid_moves) {
@@ -326,8 +326,8 @@ static int_fast32_t cubed_bot_pvs(const struct cubed_board *board,int_fast32_t a
     return res;
 }
 
-static int_fast32_t cubed_bot_pvs_exact_null_window(const struct cubed_board *board,int_fast32_t alpha) {
-    int_fast32_t res;
+static int cubed_bot_pvs_exact_null_window(const struct cubed_board *board,int alpha) {
+    int res;
     uint64_t valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
     struct cubed_board child;
     if (valid_moves) {
@@ -336,7 +336,7 @@ static int_fast32_t cubed_bot_pvs_exact_null_window(const struct cubed_board *bo
             child = *board;
             uint64_t move_bit = uint64_first_bit(valid_moves);
             cubed_board_do_move(&child,uint64_only_bit_index(move_bit));
-            int_fast32_t heur = -cubed_bot_pvs_exact_null_window(&child, -(alpha+1));
+            int heur = -cubed_bot_pvs_exact_null_window(&child, -(alpha+1));
             valid_moves ^= move_bit;
             if (heur > alpha) {
                 res = alpha + 1;
@@ -359,13 +359,13 @@ static int_fast32_t cubed_bot_pvs_exact_null_window(const struct cubed_board *bo
     return res;
 }
 
-static int_fast32_t cubed_bot_pvs_exact(const struct cubed_board *board,int_fast32_t alpha,int_fast32_t beta) {
+static int cubed_bot_pvs_exact(const struct cubed_board *board,int alpha,int beta) {
     assert(alpha <= beta);
-    int_fast32_t res;
+    int res;
     struct cubed_board child;
     uint64_t valid_moves = cubed_board_get_valid_moves(board->me,board->opp);
     if (valid_moves) {
-        int_fast32_t heur;
+        int heur;
         bool first = TRUE;
         res = alpha;
         while (valid_moves) {
@@ -493,21 +493,21 @@ static void debug_cubed_board_init_reset(struct cubed_board *board) {
 static uint64_t debug_cubed_board_get_valid_moves(const struct cubed_board *board) {
     const uint64_t empty = ~(board->me | board->opp);
     uint64_t moves = 0ull;
-    for(int_fast32_t f=0; f<64; ++f) {
+    for(int f=0; f<64; ++f) {
         if(empty & (1ull << f)) {
-            for(int_fast32_t dx=-1; dx<=1; ++dx) {
-                for(int_fast32_t dy=-1; dy<=1; ++dy) {
+            for(int dx=-1; dx<=1; ++dx) {
+                for(int dy=-1; dy<=1; ++dy) {
                     if(dx == 0 && dy == 0) {
                         continue;
                     }
-                    int_fast32_t s = 1;
+                    int s = 1;
                     while(TRUE) {
-                        int_fast32_t curx = (f%8) + (dx*s);
-                        int_fast32_t cury = (f/8) + (dy*s);
+                        int curx = (f%8) + (dx*s);
+                        int cury = (f/8) + (dy*s);
                         if(curx >= 8 || cury >= 8 || curx < 0 || cury < 0 ) {
                             break;
                         }
-                        int_fast32_t cur = 8*cury + curx;
+                        int cur = 8*cury + curx;
                         if(board->opp & (1ull << cur)) {
                             ++s;
                         }
@@ -526,9 +526,9 @@ static uint64_t debug_cubed_board_get_valid_moves(const struct cubed_board *boar
 }
 
 
-static int_fast32_t debug_cubed_board_get_disc_diff(const struct cubed_board *board) {
-    int_fast32_t me_count = (int_fast32_t)uint64_count(board->me);
-    int_fast32_t opp_count = (int_fast32_t)uint64_count(board->opp);
+static int debug_cubed_board_get_disc_diff(const struct cubed_board *board) {
+    int me_count = (int)uint64_count(board->me);
+    int opp_count = (int)uint64_count(board->opp);
     if(me_count > opp_count) {
         return 64 - (2 * opp_count);
     }
@@ -543,16 +543,16 @@ static uint64_t debug_cubed_board_do_move(struct cubed_board *board,size_t field
         return 0ull;
     }
     uint64_t flipped = 0ull;
-    for(int_fast32_t dx=-1; dx<=1; ++dx) {
-        for(int_fast32_t dy=-1; dy<=1; ++dy) {
+    for(int dx=-1; dx<=1; ++dx) {
+        for(int dy=-1; dy<=1; ++dy) {
             if(dx == 0 && dy == 0) {
                 continue;
             }
-            int_fast32_t s = 1;
+            int s = 1;
             while(TRUE) {
-                int_fast32_t curx = (int_fast32_t)(field_id%8) + (dx*s);
-                int_fast32_t cury = (int_fast32_t)(field_id/8) + (dy*s);
-                int_fast32_t cur = 8*cury + curx;
+                int curx = (int)(field_id%8) + (dx*s);
+                int cury = (int)(field_id/8) + (dy*s);
+                int cur = 8*cury + curx;
                 if(curx < 0 || curx >= 8 || cury < 0 || cury >= 8) {
                     break;
                 }
@@ -788,8 +788,8 @@ static void cubed_sanity_check(bool seeded) {
         struct cubed_board board;
         struct cubed_bot *bot;
         bot = cubed_bot_new();
-        int_fast32_t pvs_heur,mtdf_heur,high,low;
-        int_fast32_t ab_heur,mm_heur;
+        int pvs_heur,mtdf_heur,high,low;
+        int ab_heur,mm_heur;
         size_t loop_count = 0;
         size_t ok_count = 0;
         while(loop_count < 1000000) {
@@ -836,12 +836,12 @@ static void cubed_sanity_check(bool seeded) {
                 ok_count++;
             }
             else {
-                printf("mtdf_heur = %" PRIdFAST32 "\n",mtdf_heur);
-                printf("pvs_heur = %" PRIdFAST32 "\n",pvs_heur);
-                printf("ab_heur = %" PRIdFAST32 "\n",ab_heur);
-                printf("mm_heur = %" PRIdFAST32 "\n",mm_heur);
+                printf("mtdf_heur = %d\n",mtdf_heur);
+                printf("pvs_heur = %d\n",pvs_heur);
+                printf("ab_heur = %d\n",ab_heur);
+                printf("mm_heur = %d\n",mm_heur);
                 cubed_board_print(&board);
-                printf("%" PRIuFAST64 " %" PRIuFAST64 "\n",board.me,board.opp);
+                printf("%lx %lx\n",board.me,board.opp);
             }
             if(loop_count % 1000 == 0) {
                 printf("Ran %lu tests, %lu were ok: %lf %%\n",loop_count,ok_count,(100.0*ok_count)/loop_count);

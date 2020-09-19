@@ -26,10 +26,10 @@ struct cubed_bot {
     /** @brief total visited nodes for performance measurement */
     size_t nodes;
 
-    int_fast32_t last_best_heur;
+    int last_best_heur;
 };
 
-int_fast32_t cubed_bot_get_last_best_heur(const struct cubed_bot *bot) {
+int cubed_bot_get_last_best_heur(const struct cubed_bot *bot) {
     return bot->last_best_heur;
 }
 
@@ -37,14 +37,39 @@ int_fast32_t cubed_bot_get_last_best_heur(const struct cubed_bot *bot) {
 static void cubed_bot_print_stats(const struct cubed_bot *bot) {
     double seconds = g_timer_elapsed(bot->timer,NULL);
     size_t nps = (size_t)(bot->nodes / seconds);
-    printf("%" PRIdFAST32 " nodes in %lf seconds: %" PRIdFAST32 " nodes/second\n",bot->nodes, seconds,nps);
+    printf("%ld nodes in %lf seconds: %ld nodes/second\n",bot->nodes, seconds,nps);
 }
 
-static int_fast32_t cubed_bot_heuristic_moves_uint64(uint64_t me,uint64_t opp) {
-    int_fast32_t me_move_count = (int_fast32_t)uint64_count(cubed_board_get_valid_moves(me,opp));
-    int_fast32_t opp_move_count = (int_fast32_t)uint64_count(cubed_board_get_valid_moves(opp,me));
-    int_fast32_t move_count_diff = me_move_count - opp_move_count;
-    int_fast32_t corner_diff = 0;
+
+
+const uint64_t leftMask = 0x7F7F7F7F7F7F7F7F;
+const uint64_t rightMask = 0xFEFEFEFEFEFEFEFE;
+
+static int cubed_bot_heuristic_moves_uint64(uint64_t me,uint64_t opp) {
+
+	uint64_t mePotentialMoves = (opp & leftMask) << 1;
+	mePotentialMoves |= (opp & rightMask) >> 1;
+	mePotentialMoves |= (opp & leftMask) << 9;
+	mePotentialMoves |= (opp & rightMask) >> 9;
+	mePotentialMoves |= (opp & rightMask) << 7;
+	mePotentialMoves |= (opp & leftMask) >> 7;
+	mePotentialMoves |= opp << 8;
+	mePotentialMoves |= opp >> 8;
+	mePotentialMoves &= ~(me | opp);
+
+	uint64_t oppPotentialMoves = (me & leftMask) << 1;
+	oppPotentialMoves |= (me & rightMask) >> 1;
+	oppPotentialMoves |= (me & leftMask) << 9;
+	oppPotentialMoves |= (me & rightMask) >> 9;
+	oppPotentialMoves |= (me & rightMask) << 7;
+	oppPotentialMoves |= (me & leftMask) >> 7;
+	oppPotentialMoves |= me << 8;
+	oppPotentialMoves |= me >> 8;
+	oppPotentialMoves &= ~(me | opp);
+
+    int potential_move_count_diff = (int)uint64_count(mePotentialMoves) - (int)uint64_count(oppPotentialMoves);
+
+    int corner_diff = 0;
     corner_diff += !!(me & 0x8000000000000000);
     corner_diff += !!(me & 0x0100000000000000);
     corner_diff += !!(me & 0x0000000000000080);
@@ -53,30 +78,31 @@ static int_fast32_t cubed_bot_heuristic_moves_uint64(uint64_t me,uint64_t opp) {
     corner_diff -= !!(opp & 0x0100000000000000);
     corner_diff -= !!(opp & 0x0000000000000080);
     corner_diff -= !!(opp & 0x0000000000000001);
-    return move_count_diff + (3 * corner_diff);
+
+    return potential_move_count_diff + (3 * corner_diff);
 }
 
-int_fast32_t cubed_bot_heuristic_moves(const struct cubed_board *board) {
+int cubed_bot_heuristic_moves(const struct cubed_board *board) {
     return cubed_bot_heuristic_moves_uint64(board->me,board->opp);
 }
 
-static int_fast32_t cubed_bot_mtdf_polish(int_fast32_t heur,int_fast32_t alpha) {
+static int cubed_bot_mtdf_polish(int heur,int alpha) {
     if (heur > alpha) {
         return alpha + 1;
     }
     return alpha;
 }
 
-static int_fast32_t cubed_bot_mtdf(struct cubed_bot *bot,uint64_t me,uint64_t opp,int_fast32_t alpha) {
+static int cubed_bot_mtdf(struct cubed_bot *bot,uint64_t me,uint64_t opp,int alpha) {
     ++bot->nodes;
     if(bot->moves_left == 0) {
-        int_fast32_t heur = cubed_bot_heuristic_moves_uint64(me,opp);
+        int heur = cubed_bot_heuristic_moves_uint64(me,opp);
         return cubed_bot_mtdf_polish(heur,alpha);
     }
     uint64_t valid_moves = cubed_board_get_valid_moves(me,opp);
     if (!valid_moves) {
         if(!cubed_board_get_valid_moves(opp,me)) {
-            int_fast32_t heur = EXACT_SCORE_FACTOR * cubed_board_get_disc_diff_uint64(me,opp);
+            int heur = EXACT_SCORE_FACTOR * cubed_board_get_disc_diff_uint64(me,opp);
             return cubed_bot_mtdf_polish(heur,alpha);
         }
         return -cubed_bot_mtdf(bot,opp,me,-(alpha+1));
@@ -88,7 +114,7 @@ static int_fast32_t cubed_bot_mtdf(struct cubed_bot *bot,uint64_t me,uint64_t op
         uint64_t child_opp = me | move_bit | flipped_discs;
         uint64_t child_me = opp & (~flipped_discs);
         --bot->moves_left;
-        int_fast32_t heur = -cubed_bot_mtdf(bot,child_me,child_opp,-(alpha+1));
+        int heur = -cubed_bot_mtdf(bot,child_me,child_opp,-(alpha+1));
         ++bot->moves_left;
         if (heur > alpha) {
             return alpha + 1;
@@ -99,12 +125,12 @@ static int_fast32_t cubed_bot_mtdf(struct cubed_bot *bot,uint64_t me,uint64_t op
     return alpha;
 }
 
-static int_fast32_t cubed_bot_mtdf_exact(struct cubed_bot *bot,uint64_t me,uint64_t opp,int_fast32_t alpha) {
+static int cubed_bot_mtdf_exact(struct cubed_bot *bot,uint64_t me,uint64_t opp,int alpha) {
     ++bot->nodes;
     uint64_t valid_moves = cubed_board_get_valid_moves(me,opp);
     if (!valid_moves) {
         if(!cubed_board_get_valid_moves(opp,me)) {
-            int_fast32_t heuristic = cubed_board_get_disc_diff_uint64(me,opp);
+            int heuristic = cubed_board_get_disc_diff_uint64(me,opp);
             return cubed_bot_mtdf_polish(heuristic,alpha);
         }
         return -cubed_bot_mtdf_exact(bot,opp,me,-(alpha+1));
@@ -116,7 +142,7 @@ static int_fast32_t cubed_bot_mtdf_exact(struct cubed_bot *bot,uint64_t me,uint6
         uint64_t child_opp = me | move_bit | flipped_discs;
         uint64_t child_me = opp & (~flipped_discs);
         --bot->moves_left;
-        int_fast32_t heuristic = -cubed_bot_mtdf_exact(bot,child_me,child_opp,-(alpha+1));
+        int heuristic = -cubed_bot_mtdf_exact(bot,child_me,child_opp,-(alpha+1));
         ++bot->moves_left;
         if (heuristic > alpha) {
             return alpha + 1;
@@ -127,10 +153,10 @@ static int_fast32_t cubed_bot_mtdf_exact(struct cubed_bot *bot,uint64_t me,uint6
 }
 
 
-static int_fast32_t cubed_bot_mtdf_wrapper_loop(struct cubed_bot *bot,struct cubed_board *board,
-        int_fast32_t lower_bound,int_fast32_t upper_bound,int_fast32_t guess,int_fast32_t step,bool exact
+static int cubed_bot_mtdf_wrapper_loop(struct cubed_bot *bot,struct cubed_board *board,
+        int lower_bound,int upper_bound,int guess,int step,bool exact
                                                ) {
-    int_fast32_t f = guess;
+    int f = guess;
     if(f < lower_bound) {
         f = lower_bound;
     }
@@ -138,7 +164,7 @@ static int_fast32_t cubed_bot_mtdf_wrapper_loop(struct cubed_bot *bot,struct cub
         f = upper_bound;
     }
     while(upper_bound - lower_bound >= step) {
-        int_fast32_t bound;
+        int bound;
         if(exact) {
             bound = -cubed_bot_mtdf_exact(bot,board->me,board->opp,-(f+1));
         }
@@ -157,8 +183,8 @@ static int_fast32_t cubed_bot_mtdf_wrapper_loop(struct cubed_bot *bot,struct cub
     return upper_bound;
 }
 
-int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *board,int_fast32_t lower_bound,
-                                    int_fast32_t upper_bound,int_fast32_t guess
+int cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *board,int lower_bound,
+                                    int upper_bound,int guess
                                    ) {
     /*
         We run a capped version of cubed_bot_mtdf_wrapper_loop() first with stepsize 1
@@ -171,17 +197,17 @@ int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *bo
         cubed_bot_mtdf_exact_wrapper does. Main difference is that we use exact flag as FALSE
         to obtain the disc difference multiplied by EXACT_SCORE_FACTOR.
     */
-    const int_fast32_t upper_cap = 40;
-    const int_fast32_t lower_cap = -upper_cap;
-    int_fast32_t capped_upper_bound = upper_bound;
+    const int upper_cap = 40;
+    const int lower_cap = -upper_cap;
+    int capped_upper_bound = upper_bound;
     if(capped_upper_bound > upper_cap) {
         capped_upper_bound = upper_cap;
     }
-    int_fast32_t capped_lower_bound = lower_bound;
+    int capped_lower_bound = lower_bound;
     if(capped_lower_bound < lower_cap) {
         capped_lower_bound = lower_cap;
     }
-    int_fast32_t capped_result;
+    int capped_result;
     capped_result = cubed_bot_mtdf_wrapper_loop(bot,board,capped_lower_bound,capped_upper_bound,guess,1,FALSE);
     if(capped_result > lower_cap && capped_result < upper_cap) {
         return capped_result;
@@ -189,8 +215,8 @@ int_fast32_t cubed_bot_mtdf_wrapper(struct cubed_bot *bot,struct cubed_board *bo
     return cubed_bot_mtdf_wrapper_loop(bot,board,lower_bound,upper_bound,guess,2*EXACT_SCORE_FACTOR,FALSE);
 }
 
-int_fast32_t cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_board *board,int_fast32_t lower_bound,
-        int_fast32_t upper_bound,int_fast32_t guess
+int cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_board *board,int lower_bound,
+        int upper_bound,int guess
                                          ) {
     return cubed_bot_mtdf_wrapper_loop(bot,board,lower_bound,upper_bound,guess,2,TRUE);
 }
@@ -198,7 +224,7 @@ int_fast32_t cubed_bot_mtdf_exact_wrapper(struct cubed_bot *bot,struct cubed_boa
 static void cubed_bot_sort_children(struct cubed_bot *bot,struct cubed_board_estimate *estimates,
                                     size_t estimate_length,size_t lookahead
                                    ) {
-    int_fast32_t best_estimate = MIN_NORMAL_HEURISTIC;
+    int best_estimate = MIN_NORMAL_HEURISTIC;
     bot->moves_left = lookahead;
     for(size_t i=0; i<estimate_length; ++i) {
         estimates[i].estimate = cubed_bot_mtdf_wrapper(bot,&estimates[i].board,best_estimate,
@@ -220,7 +246,7 @@ static void cubed_bot_search(struct cubed_bot *bot,const struct cubed_board *boa
             cubed_bot_sort_children(bot,estimates,total_children,d);
         }
     }
-    int_fast32_t best_heur;
+    int best_heur;
     if(exact) {
         best_heur = MIN_EXACT_HEURISTIC;
         size_t empty_count = uint64_count(~(board->me | board->opp));
@@ -235,7 +261,7 @@ static void cubed_bot_search(struct cubed_bot *bot,const struct cubed_board *boa
     g_timer_start(bot->timer);
     *res = estimates[0].board;
     for(size_t i=0; i<total_children; ++i) {
-        int_fast32_t heur;
+        int heur;
         struct cubed_board *current_child = &estimates[i].board;
         if(exact) {
             heur = cubed_bot_mtdf_exact_wrapper(bot,current_child,best_heur,MAX_EXACT_HEURISTIC,best_heur);
@@ -250,7 +276,7 @@ static void cubed_bot_search(struct cubed_bot *bot,const struct cubed_board *boa
             *res = estimates[i].board;
         }
         g_timer_stop(bot->timer);
-        printf("move %zd/%zd: %" PRIdFAST32 "\n", i+1,total_children,best_heur);
+        printf("move %zd/%zd: %d\n", i+1,total_children,best_heur);
         g_timer_continue(bot->timer);
     }
     bot->last_best_heur = best_heur;
