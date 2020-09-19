@@ -79,11 +79,12 @@ static void cubed_human_do_cli_move(const struct cubed_control *control,const st
     }
 
     size_t move_num;
+    int scanf_value;
     do {
         printf("%s","Enter a move: ");
-        scanf("%19s",buff);
+        scanf_value = scanf("%19s",buff);
         move_num = (size_t)(buff[0] - 'a');
-    } while(move_num >= child_count);
+    } while(scanf_value != 1 && move_num >= child_count);
 
     *output = children[move_num];
 }
@@ -146,7 +147,7 @@ static size_t cubed_flag_bot(struct cubed_control *control,const char **args,siz
         printf("%s","Bot colour not recognised.\n");
         return 0;
     }
-    
+
     size_t depth,perfect_depth;
     if ((sscanf(args[2],"%zu",&depth) < 0) || (sscanf(args[3],"%zu",&perfect_depth) < 0)){
         printf("%s","Search depth or perfect search depth not recognised.\n");
@@ -192,7 +193,7 @@ static const struct cubed_control_modifier control_modifiers[] = {
 };
 
 static void cubed_board_init_xot(struct cubed_board *board,struct cubed_control *control){
-    
+
     const size_t n_xot_boards = 10784;
 
     if(!control->xot_boards){
@@ -211,7 +212,7 @@ static void cubed_board_init_xot(struct cubed_board *board,struct cubed_control 
                 exit(1);
             }
             ++xot_board;
-            if(xot_board - xot_boards > n_xot_boards){
+            if(xot_board - xot_boards > (int)n_xot_boards){
                 printf("%s","Xot file too long.\n");
                 exit(1);
             }
