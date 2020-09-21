@@ -26,13 +26,6 @@ size_t uint64_first_index(uint64_t bitset);
 size_t uint64_only_bit_index(uint64_t bitset);
 
 /**
-    @brief Compute index of last set bit in bitset
-    @param bitset the bitset, shall not be 0ull
-    @return index of last set bit or 64 if none are set
-*/
-size_t uint64_last_index(uint64_t bitset);
-
-/**
     @brief Compute first set bit in bitset
     @param bitset the bitset
     @return bitset with at most one set bit
@@ -52,18 +45,3 @@ uint64_t uint64_last_bit(uint64_t b);
     @return the number of set bits
 */
 size_t uint64_count(uint64_t bitset);
-
-/**
-    @brief Reset bits with index <= n; assigns 0ull if n == 64
-    @param bitset the bitset
-    @param n an index <= 64
-*/
-void uint64_reset_before(uint64_t *bitset,size_t n);
-
-/**
-    @brief Reset with index >= n; assigns 0ull if n == 64
-    @param bitset the bitset
-    @param n an index <= 64
-*/
-void uint64_reset_after(uint64_t *bitset,size_t n);
-

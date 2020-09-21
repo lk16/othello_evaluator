@@ -438,23 +438,9 @@ static size_t debug_uint64_only_bit_index(uint64_t bitset) {
     return debug_uint64_first_index(bitset);
 }
 
-static size_t debug_uint64_last_index(uint64_t bitset) {
-    for(size_t i=63; i<64; --i) {
-        if(bitset & (1ull << i)) {
-            return i;
-        }
-    }
-    return 64;
-}
-
 static uint64_t debug_uint64_first_bit(uint64_t bitset) {
     return 1ull << debug_uint64_first_index(bitset);
 }
-
-static uint64_t debug_uint64_last_bit(uint64_t bitset) {
-    return 1ull << debug_uint64_last_index(bitset);
-}
-
 
 static size_t debug_uint64_count(uint64_t bitset) {
     size_t count = 0;
@@ -464,20 +450,6 @@ static size_t debug_uint64_count(uint64_t bitset) {
         }
     }
     return count;
-}
-
-static void debug_uint64_reset_before(uint64_t *bitset,size_t n) {
-    if(n == 64 || n == 63) {
-        *bitset = 0ull;
-    }
-    *bitset &= ~((1ull << (n+1)) - 1);
-}
-
-static void debug_uint64_reset_after(uint64_t *bitset,size_t n) {
-    if(n == 64 || n == 0) {
-        *bitset = 0ull;
-    }
-    *bitset &= ~(((1ull << (64-n)) - 1) << n);
 }
 
 static void debug_cubed_board_check_valid_state(const struct cubed_board *board) {
@@ -646,13 +618,6 @@ static void cubed_sanity_check(bool seeded) {
                 assert(uint64_only_bit_index(*iter) == debug_uint64_only_bit_index(*iter));
             }
         }
-        printf("Testing %s\n","uint64_last_index");
-        for(iter=start; iter!=end; ++iter) {
-            if(!*iter) {
-                continue;
-            }
-            assert(uint64_last_index(*iter) == debug_uint64_last_index(*iter));
-        }
         printf("Testing %s\n","uint64_first_bit");
         for(iter=start; iter!=end; ++iter) {
             if(!*iter) {
@@ -660,35 +625,9 @@ static void cubed_sanity_check(bool seeded) {
             }
             assert(uint64_first_bit(*iter) == debug_uint64_first_bit(*iter));
         }
-        printf("Testing %s\n","uint64_last_bit");
-        for(iter=start; iter!=end; ++iter) {
-            if(!*iter) {
-                continue;
-            }
-            assert(uint64_last_bit(*iter) == debug_uint64_last_bit(*iter));
-        }
         printf("Testing %s\n","uint64_count");
         for(iter=start; iter!=end; ++iter) {
             assert(uint64_count(*iter) == debug_uint64_count(*iter));
-        }
-        uint64_t copy[2];
-        printf("Testing %s\n","uint64_reset_before");
-        for(iter=start; iter!=end; ++iter) {
-            for(size_t n=0; n<64; ++n) {
-                copy[0] = copy[1] = *iter;
-                uint64_reset_before(&copy[0],n);
-                debug_uint64_reset_before(&copy[1],n);
-                assert(copy[0] == copy[1]);
-            }
-        }
-        printf("Testing %s\n","uint64_reset_after");
-        for(iter=start; iter!=end; ++iter) {
-            for(size_t n=0; n<64; ++n) {
-                copy[0] = copy[1] = *iter;
-                uint64_reset_after(&copy[0],n);
-                debug_uint64_reset_after(&copy[1],n);
-                assert(copy[0] == copy[1]);
-            }
         }
         free(bitsets);
     }

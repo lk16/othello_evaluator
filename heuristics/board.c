@@ -158,7 +158,7 @@ size_t cubed_board_get_move_index(const struct cubed_board *before,const struct 
 
 #include "flip_sse.c"
 
-static uint64_t(*const cubed_move_funcs[64])(uint64_t,uint64_t) = {
+static unsigned long long(*const cubed_move_funcs[64])(unsigned long long,unsigned long long) = {
     flip_A1,
     flip_B1,
     flip_C1,
@@ -227,7 +227,7 @@ static uint64_t(*const cubed_move_funcs[64])(uint64_t,uint64_t) = {
 
 
 uint64_t cubed_board_get_flips_generic(uint64_t me,uint64_t opp,size_t move_id) {
-    return cubed_move_funcs[move_id](me,opp);
+    return (unsigned long long)cubed_move_funcs[move_id]((unsigned long long)me,(unsigned long long)opp);
 }
 
 
