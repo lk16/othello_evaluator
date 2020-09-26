@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "config.h"
 #include "board.h"
 
 void cubed_board_init_reset(struct cubed_board *board) {

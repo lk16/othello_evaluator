@@ -1,3 +1,0 @@
-#pragma once
-
-#define CUBED_UINT64_COUNT_LOOKUPTABLE_SIZE (16)

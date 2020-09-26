@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 #include "macros.h"
-#include "config.h"
 
 /**
     @brief Compute first set bit in bitset

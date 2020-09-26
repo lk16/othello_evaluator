@@ -3,7 +3,6 @@
 #include <malloc.h>
 
 #include "bitset.h"
-#include "config.h"
 
 size_t uint64_first_bit(uint64_t b) {
     return b & -b;
