@@ -13,6 +13,7 @@ struct cubed_control {
     struct cubed_bot *bot[2];
     bool use_xot;
     bool use_forced_moves;
+    bool run_tests;
     struct cubed_board *xot_boards;
 };
 
@@ -24,6 +25,12 @@ struct cubed_control_modifier {
     control_modifier_t modifier;
 };
 
+static size_t cubed_flag_run_tests(struct cubed_control *control,const char **args,size_t remaining_args){
+    (void)args;
+    (void)remaining_args;
+    control->run_tests = 1;
+    return 1;
+}
 
 static void cubed_game_state_print(const struct cubed_game_state *state) {
     struct cubed_board copy = state->board;
@@ -184,14 +191,6 @@ static size_t cubed_flag_forced_moves(struct cubed_control *control,const char *
     return 1;
 }
 
-static const struct cubed_control_modifier control_modifiers[] = {
-    {"-b",cubed_flag_bot},
-    {"--bot",cubed_flag_bot},
-    {"-x",cubed_flag_xot},
-    {"--xot",cubed_flag_xot},
-    {"-f",cubed_flag_forced_moves}
-};
-
 static void cubed_board_init_xot(struct cubed_board *board,struct cubed_control *control){
 
     const size_t n_xot_boards = 10784;
@@ -225,6 +224,17 @@ static void cubed_board_init_xot(struct cubed_board *board,struct cubed_control 
     *board = control->xot_boards[rand() % n_xot_boards];
 }
 
+static const struct cubed_control_modifier control_modifiers[] = {
+    {"-b", cubed_flag_bot},
+    {"--bot", cubed_flag_bot},
+    {"-x", cubed_flag_xot},
+    {"--xot", cubed_flag_xot},
+    {"-f", cubed_flag_forced_moves},
+    {"-t", cubed_flag_run_tests},
+    {"--test", cubed_flag_run_tests}
+};
+
+
 
 
 struct cubed_control *cubed_control_new(void) {
@@ -237,6 +247,7 @@ struct cubed_control *cubed_control_new(void) {
     control->bot[1] = NULL;
     control->use_xot = 0;
     control->use_forced_moves = 0;
+    control->run_tests = 0;
     control->xot_boards = NULL;
     cubed_board_init_reset(&control->current_state->board);
     control->current_state->white_to_move = 0;
@@ -285,6 +296,10 @@ void cubed_control_parse_args(struct cubed_control *control,int argc,const char 
 
 
 void cubed_control_run(struct cubed_control *control) {
+    if(control->run_tests){
+        cubed_sanity_check(TRUE);
+        return;
+    }
     if(control->use_xot){
         cubed_board_init_xot(&control->current_state->board,control);
     }

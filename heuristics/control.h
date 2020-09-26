@@ -5,6 +5,7 @@
 
 #include "bot.h"
 #include "macros.h"
+#include "testing.h"
 #include "board.h"
 
 #define CUBED_CONTROL_HISTORY_SIZE (100)

@@ -29,6 +29,7 @@ add_executable(cubed
     bot.c
     control.c
     cubed.c
+    testing.c
 )
 
 target_link_libraries(cubed
@@ -36,34 +37,6 @@ target_link_libraries(cubed
 )
 
 set_target_properties(cubed PROPERTIES COMPILE_FLAGS ${OPTMISING_FLAGS})
-
-add_executable(dev_cubed
-    bitset.c
-    board.c
-    bot.c
-    control.c
-    cubed.c
-)
-
-target_link_libraries(dev_cubed
-    ${GLIB_LIBRARIES}
-)
-
-set_target_properties(dev_cubed PROPERTIES COMPILE_FLAGS ${DEBUG_FLAGS})
-
-
-add_executable(testing
-    bitset.c
-    board.c
-    bot.c
-    testing.c
-)
-
-set_target_properties(testing PROPERTIES COMPILE_FLAGS ${DEBUG_FLAGS})
-
-target_link_libraries(testing
-    ${GLIB_LIBRARIES}
-)
 
 add_executable(heuristics
     heuristics.c

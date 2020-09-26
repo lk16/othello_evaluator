@@ -16,10 +16,4 @@
 */
 #define CUBED_TESTING_SAMPLES (CUBED_TESTING_SAMPLES_SQRT*CUBED_TESTING_SAMPLES_SQRT)
 
-/**
-    @brief main testing function
-    @param argc argument count
-    @param argv argument values
-    @return 0 if success; non zero on failure
-*/
-int main(int argc,char **argv);
+void cubed_sanity_check(bool seeded);

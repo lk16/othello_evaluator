@@ -581,11 +581,7 @@ static void debug_cubed_board_init_random(struct cubed_board *board,size_t ndisc
     }
 }
 
-static void cubed_sanity_check(bool seeded) {
-#ifdef NDEBUG
-    printf("%s","WARNING: not running sanity check completely.\n");
-    printf("%s","This binary is compiled with NDEBUG.\n");
-#endif
+void cubed_sanity_check(bool seeded) {
     cubed_sanity_check_init(seeded);
     {
         printf("%s","Generating uint64_t samples\n");
@@ -788,15 +784,4 @@ static void cubed_sanity_check(bool seeded) {
         }
         cubed_bot_destroy(bot);
     }
-}
-
-int main(int argc,char **argv) {
-    bool seeded = FALSE;
-    if(argc >= 2) {
-        if(strcmp(argv[1],"-s") == 0) {
-            seeded = TRUE;
-        }
-    }
-    cubed_sanity_check(seeded);
-    return 0;
 }
